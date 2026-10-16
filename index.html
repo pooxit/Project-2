@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proses Pertumbuhan Bunga</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    background: linear-gradient(#b8e8ff, #f2fbff 60%, #d9f4c7);
+    font-family: system-ui, Arial, sans-serif; color: #21452d;
+  }
+  .app { width: min(960px, 100%); padding: 18px; text-align: center; }
+  h1 { margin: 4px 0 6px; font-size: clamp(1.45rem, 4vw, 2.2rem); }
+  .sub { margin: 0 0 16px; color: #456b50; }
+  .scene {
+    position: relative; width: 100%; height: min(62vh, 510px); min-height: 330px;
+    overflow: hidden; border: 3px solid #fff; border-radius: 24px;
+    box-shadow: 0 14px 38px #34734b24;
+    background: linear-gradient(#8bd7ff 0%, #dff7ff 68%, #b8e9a0 68%, #b8e9a0 100%);
+  }
+  .sun {
+    position: absolute; width: 68px; height: 68px; top: 28px; right: 9%;
+    border-radius: 50%; background: #ffd84d; box-shadow: 0 0 0 12px #ffdf6940, 0 0 45px #ffdf69;
+    animation: sunPulse 3s ease-in-out infinite;
+  }
+  .cloud { position:absolute; width:90px; height:28px; background:#fff; border-radius:30px; opacity:.85; top:58px; left:8%; animation: drift 12s ease-in-out infinite alternate; }
+  .cloud:before,.cloud:after { content:""; position:absolute; background:#fff; border-radius:50%; }
+  .cloud:before { width:37px;height:37px;left:15px;top:-18px; }
+  .cloud:after { width:28px;height:28px;left:43px;top:-11px; }
+  .cloud.two { top:125px; left:auto; right:26%; transform:scale(.65); animation-delay:-4s; }
+  .ground { position:absolute; bottom:0; left:0; width:100%; height:32%; background:linear-gradient(#9b633a,#75452d); border-top:8px solid #55b85b; }
+  .soil-line { position:absolute; top:68%; left:0; right:0; height:4px; background:#429e45; }
+  .seed {
+    position:absolute; z-index:3; left:50%; top:76%; width:22px;height:15px;
+    background:#8c5428;border-radius:60% 45% 55% 45%; transform:translate(-50%,-50%) rotate(-22deg);
+    box-shadow:inset -4px -2px #673b20;
+  }
+  .plant { position:absolute; left:50%; bottom:31%; width:5px; height:0; transform:translateX(-50%); background:#278b45; border-radius:8px; z-index:4; }
+  .leaf { position:absolute; width:0; height:0; background:#39b95c; border-radius:100% 0 100% 0; z-index:5; }
+  .leaf.left { right:2px; bottom:45%; transform:rotate(18deg); transform-origin:right bottom; }
+  .leaf.right { left:2px; bottom:62%; transform:rotate(75deg) scaleX(-1); transform-origin:left bottom; }
+  .bud { position:absolute; left:50%; bottom:calc(31% + 0px); width:0;height:0; transform:translateX(-50%); z-index:6; }
+  .flower { position:absolute; left:50%; bottom:0; width:0;height:0; transform:translateX(-50%); z-index:7; }
+  .petal { position:absolute; width:0;height:0; left:0; top:0; border-radius:55% 55% 45% 45%; background:linear-gradient(145deg,#ff9ac9,#ed3f8c); transform-origin:50% 100%; }
+  .center { position:absolute; width:0;height:0; left:0;top:0; border-radius:50%; background:#ffce39; transform:translate(-50%,-50%); box-shadow:0 0 0 0 #ffeb8a; }
+  .stage-label {
+    position:absolute; top:14px; left:14px; padding:8px 12px; border-radius:999px;
+    background:#ffffffd9; font-size:.9rem; font-weight:700; box-shadow:0 3px 12px #174b2420;
+  }
+  .caption { min-height:52px; padding:12px 8px 4px; font-weight:600; }
+  .controls { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:8px; }
+  button { border:0; border-radius:999px; padding:11px 20px; font-size:1rem; font-weight:700; cursor:pointer; }
+  #play { background:#258a48; color:#fff; box-shadow:0 5px 0 #176a34; }
+  #restart { background:#fff; color:#287341; border:2px solid #b5dfbd; }
+  button:active { transform:translateY(2px); box-shadow:none; }
+  .timeline { width:min(520px,100%); margin:14px auto 0; height:7px; background:#ffffffb5; border-radius:10px; overflow:hidden; }
+  .progress { height:100%; width:0; background:linear-gradient(90deg,#38a85a,#f3c83e,#ef5897); transition:width .35s; }
+  .grass { position:absolute; bottom:31%; height:20px; width:100%; z-index:2; pointer-events:none; }
+  .grass i { position:absolute; bottom:0; width:4px;height:14px;background:#3d9f48;border-radius:100% 0; transform:rotate(-25deg); }
+  @keyframes drift { to { translate: 55px 0; } }
+  @keyframes sunPulse { 50% { box-shadow:0 0 0 18px #ffdf6930,0 0 55px #ffdf69; } }
+  @media(max-width:480px) {
+    .app{padding:12px}.scene{min-height:350px;height:54vh;border-radius:18px}
+    .sun{width:52px;height:52px}.stage-label{font-size:.78rem}
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>🌷 Pertumbuhan Bunga</h1>
+  <p class="sub">Dari biji kecil hingga bunga yang mekar</p>
+  <section class="scene" aria-label="Animasi pertumbuhan bunga">
+    <div class="sun"></div><div class="cloud"></div><div class="cloud two"></div>
+    <div class="ground"></div><div class="soil-line"></div>
+    <div class="grass" id="grass"></div>
+    <div class="seed" id="seed"></div>
+    <div class="plant" id="plant">
+      <div class="leaf left" id="leaf1"></div>
+      <div class="leaf right" id="leaf2"></div>
+    </div>
+    <div class="bud" id="bud"></div>
+    <div class="flower" id="flower">
+      <div class="center" id="center"></div>
+    </div>
+    <div class="stage-label" id="stage">Tahap 1 dari 5 · Biji</div>
+  </section>
+  <div class="caption" id="caption">Sebuah biji kecil berada di dalam tanah.</div>
+  <div class="timeline"><div class="progress" id="progress"></div></div>
+  <div class="controls">
+    <button id="play">▶ Mulai Animasi</button>
+    <button id="restart">↻ Ulangi</button>
+  </div>
+</main>
+<script>
+  const plant = document.getElementById('plant');
+  const seed = document.getElementById('seed');
+  const leaf1 = document.getElementById('leaf1');
+  const leaf2 = document.getElementById('leaf2');
+  const bud = document.getElementById('bud');
+  const flower = document.getElementById('flower');
+  const center = document.getElementById('center');
+  const stage = document.getElementById('stage');
+  const caption = document.getElementById('caption');
+  const progress = document.getElementById('progress');
+  const play = document.getElementById('play');
+  const restart = document.getElementById('restart');
+  const labels = [
+    ['Biji','Sebuah biji kecil berada di dalam tanah.'],
+    ['Tunas','Biji mulai berkecambah dan tunas kecil muncul.'],
+    ['Batang','Batang muda tumbuh mencari cahaya matahari.'],
+    ['Daun dan kuncup','Daun tumbuh, lalu kuncup bunga mulai terbentuk.'],
+    ['Bunga mekar','Kelopak membuka dan bunga yang indah pun mekar!']
+  ];
+  let timer = null, current = 0;
+  const petals = [];
+  for (let i=0;i<8;i++) {
+    const p=document.createElement('div');
+    p.className='petal';
+    p.style.transform=`rotate(${i*45}deg) translateY(-1px)`;
+    flower.appendChild(p); petals.push(p);
+  }
+  const grass = document.getElementById('grass');
+  for(let i=0;i<34;i++){
+    const g=document.createElement('i');
+    g.style.left=(i/34*100)+'%';
+    g.style.height=(7+(i*7%15))+'px';
+    g.style.transform=`rotate(${i%2?'-':' '}${15+(i*11%30)}deg)`;
+    grass.appendChild(g);
+  }
+  function render(n) {
+    current=n;
+    stage.textContent=`Tahap ${n+1} dari 5 · ${labels[n][0]}`;
+    caption.textContent=labels[n][1];
+    progress.style.width=(n/4*100)+'%';
+    seed.style.opacity=n===0?'1':'.18';
+    plant.style.height=['0px','35px','105px','150px','150px'][n];
+    leaf1.style.width=n>=3?'48px':n>=2?'24px':'0px';
+    leaf1.style.height=n>=3?'27px':n>=2?'14px':'0px';
+    leaf2.style.width=n>=3?'43px':n>=2?'21px':'0px';
+    leaf2.style.height=n>=3?'25px':n>=2?'13px':'0px';
+    bud.style.bottom=['calc(31% + 0px)','calc(31% + 35px)','calc(31% + 105px)','calc(31% + 150px)','calc(31% + 150px)'][n];
+    bud.style.width=n===3?'20px':'0px';
+    bud.style.height=n===3?'28px':'0px';
+    bud.style.background='#e74d91';
+    bud.style.borderRadius='60% 60% 45% 45%';
+    flower.style.bottom=['calc(31% + 0px)','calc(31% + 35px)','calc(31% + 105px)','calc(31% + 150px)','calc(31% + 150px)'][n];
+    const size=n===4?34:0;
+    petals.forEach((p,i)=>{
+      p.style.width=size+'px'; p.style.height=(size*1.22)+'px';
+      p.style.left=(-size/2)+'px'; p.style.top=(-size*0.85)+'px';
+      p.style.transform=`rotate(${i*45}deg) translateY(${n===4?-2:0}px)`;
+      p.style.transition='all 1s ease';
+    });
+    center.style.width=n===4?'20px':'0px';
+    center.style.height=n===4?'20px':'0px';
+    center.style.left='0'; center.style.top='0';
+    center.style.boxShadow=n===4?'0 0 0 5px #ffeb8a55':'none';
+    play.textContent=n===4?'↻ Putar Lagi':'▶ Mulai Animasi';
+  }
+  function stop(){ if(timer){clearInterval(timer);timer=null;} }
+  function start(){
+    if(current===4) render(0);
+    stop(); play.textContent='⏸ Animasi Berjalan';
+    timer=setInterval(()=>{
+      if(current>=4){stop();play.textContent='↻ Putar Lagi';return;}
+      render(current+1);
+      if(current===4){stop();play.textContent='↻ Putar Lagi';}
+    },1800);
+  }
+  play.addEventListener('click',()=>{
+    if(timer){stop();play.textContent='▶ Lanjutkan';}
+    else start();
+  });
+  restart.addEventListener('click',()=>{stop();render(0);play.textContent='▶ Mulai Animasi';});
+  render(0);
+</script>
+</body>
+</html>
